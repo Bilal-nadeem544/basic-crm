@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  password     String
+  role         String   @default("staff")
+  tokenVersion Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  assignedLeads Lead[]     @relation("AssignedLeads")
+  activities    Activity[]
+  tasks         Task[]     @relation("AssignedTasks")
+}
+
+model Lead {
+  id                  Int        @id @default(autoincrement())
+  name                String
+  company             String?
+  email               String?
+  phone               String?
+  source              String     @default("Other")
+  stage               String     @default("New")
+  assignedToId        Int?
+  assignedTo          User?      @relation("AssignedLeads", fields: [assignedToId], references: [id])
+  convertedCustomerId Int?
+  stageChangedAt      DateTime   @default(now())
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  activities Activity[]
+  tasks      Task[]
+}
+
+model Activity {
+  id         Int      @id @default(autoincrement())
+  leadId     Int
+  lead       Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  type       String
+  summary    String   @db.Text
+  loggedById Int
+  loggedBy   User     @relation(fields: [loggedById], references: [id])
+  date       DateTime @default(now())
+}
+
+model Task {
+  id           Int      @id @default(autoincrement())
+  leadId       Int
+  lead         Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  title        String
+  dueDate      DateTime
+  assignedToId Int
+  assignedTo   User     @relation("AssignedTasks", fields: [assignedToId], references: [id])
+  status       String   @default("Pending")
+  createdAt    DateTime @default(now())
+}
