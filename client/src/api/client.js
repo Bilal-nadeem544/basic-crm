@@ -1,7 +1,9 @@
 import axios from "axios";
 
-const API_BASE = "http://localhost:5001/api";
-
+const API_BASE = import.meta.env.PROD
+  ? "https://basic-crm-production-77e1.up.railway.app/api"
+  : "http://localhost:5001/api";
+  
 let accessToken = null;
 let onUnauthorized = null;
 
