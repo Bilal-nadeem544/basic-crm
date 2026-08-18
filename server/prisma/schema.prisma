@@ -62,3 +62,9 @@ model Task {
   status       String   @default("Pending")
   createdAt    DateTime @default(now())
 }
+model CompanySettings {
+  id        Int      @id @default(1)
+  name      String   @default("Ingenious CRM")
+  logo      String?  @db.LongText
+  updatedAt DateTime @updatedAt
+}

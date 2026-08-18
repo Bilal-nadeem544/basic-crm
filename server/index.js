@@ -8,13 +8,14 @@ import activitiesRoutes from "./routes/activities.routes.js";
 import tasksRoutes from "./routes/tasks.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
 import usersRoutes from "./routes/users.routes.js";
+import companyRoutes from "./routes/company.routes.js";
 
 dotenv.config();
 
 const app = express();
 
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
-app.use(express.json());
+app.use(express.json({ limit: "5mb" }));
 app.use(cookieParser());
 
 app.get("/api/health", (req, res) => {
@@ -27,6 +28,7 @@ app.use("/api/crm/leads/:leadId/activities", activitiesRoutes);
 app.use("/api/crm/tasks", tasksRoutes);
 app.use("/api/crm/dashboard", dashboardRoutes);
 app.use("/api/users", usersRoutes);
+app.use("/api/company", companyRoutes);
 
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
