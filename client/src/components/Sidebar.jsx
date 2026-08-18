@@ -14,9 +14,9 @@ const navItems = [
 export default function Sidebar() {
   return (
     <aside className="w-56 h-screen bg-[#1F2937] flex flex-col p-4">
-      <div className="mb-8 px-2 flex items-center gap-2">
-        <img src={logo} alt="Ingenious Concepts" className="w-7 h-7 object-contain" />
-        <h1 className="font-display text-lg font-bold text-white">Ingenious CRM</h1>
+      <div className="mb-8 px-2 flex flex-col items-center gap-2">
+        <img src={logo} alt="Ingenious Concepts" className="w-16 h-16 object-contain" />
+        <h1 className="font-display text-base font-bold text-white text-center">Ingenious CRM</h1>
       </div>
 
       <nav className="flex flex-col gap-1">
