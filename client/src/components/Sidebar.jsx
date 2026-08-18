@@ -1,5 +1,6 @@
 import { LayoutGrid, Users, ListChecks, BarChart3, Settings, UsersRound } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import logo from "../assets/ingenious-logo.png";
 
 const navItems = [
   { to: "/", label: "Pipeline", icon: LayoutGrid },
@@ -12,10 +13,10 @@ const navItems = [
 
 export default function Sidebar() {
   return (
-    <aside className="w-56 h-screen bg-[#111827] flex flex-col p-4">
+    <aside className="w-56 h-screen bg-[#1F2937] flex flex-col p-4">
       <div className="mb-8 px-2 flex items-center gap-2">
-        <span className="w-2.5 h-2.5 rounded-full bg-[#2563EB]" />
-        <h1 className="font-display text-lg font-bold text-white">Basic CRM</h1>
+        <img src={logo} alt="Ingenious Concepts" className="w-7 h-7 object-contain" />
+        <h1 className="font-display text-lg font-bold text-white">Ingenious CRM</h1>
       </div>
 
       <nav className="flex flex-col gap-1">
