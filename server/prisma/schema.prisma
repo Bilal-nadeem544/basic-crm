@@ -9,64 +9,64 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  password  String
-  role      String   @default("agent")
-  createdAt DateTime @default(now())
-
-  leads     Lead[]
-  tasks     Task[]
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  password     String
+  role         String   @default("staff")
+  tokenVersion Int      @default(0)
+  createdAt    DateTime @default(now())
+  assignedLeads Lead[]     @relation("AssignedLeads")
+  activities    Activity[]
+  tasks         Task[]     @relation("AssignedTasks")
 
   @@map("crm_users")
-
 }
 
 model Lead {
-  id          Int      @id @default(autoincrement())
-  name        String
-  email       String?
-  phone       String?
-  status      String   @default("new")
-  ownerId     Int
-  owner       User     @relation(fields: [ownerId], references: [id])
-  createdAt   DateTime @default(now())
-
-  activities  Activity[]
-  tasks       Task[]
-
-  @@map("Lead")
+  id                  Int        @id @default(autoincrement())
+  name                String
+  company             String?
+  email               String?
+  phone               String?
+  source              String     @default("Other")
+  stage               String     @default("New")
+  assignedToId        Int?
+  assignedTo          User?      @relation("AssignedLeads", fields: [assignedToId], references: [id])
+  convertedCustomerId Int?
+  stageChangedAt      DateTime   @default(now())
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+  activities Activity[]
+  tasks      Task[]
 }
 
 model Activity {
-  id        Int      @id @default(autoincrement())
-  leadId    Int
-  lead      Lead     @relation(fields: [leadId], references: [id])
-  type      String
-  notes     String?
-  createdAt DateTime @default(now())
-
-  @@map("Activity")
+  id         Int      @id @default(autoincrement())
+  leadId     Int
+  lead       Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  type       String
+  summary    String   @db.Text
+  loggedById Int
+  loggedBy   User     @relation(fields: [loggedById], references: [id])
+  date       DateTime @default(now())
 }
 
 model Task {
-  id        Int      @id @default(autoincrement())
-  leadId    Int?
-  lead      Lead?    @relation(fields: [leadId], references: [id])
+  id           Int      @id @default(autoincrement())
+  leadId       Int
+  lead         Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  title        String
+  dueDate      DateTime
   assignedToId Int
-  assignedTo   User  @relation(fields: [assignedToId], references: [id])
-  title     String
-  dueDate   DateTime?
-  status    String   @default("pending")
-
-  @@map("Task")
+  assignedTo   User     @relation("AssignedTasks", fields: [assignedToId], references: [id])
+  status       String   @default("Pending")
+  createdAt    DateTime @default(now())
 }
 
 model CompanySettings {
-  id          Int      @id @default(autoincrement())
-  companyName String   @default("My CRM")
-  logoUrl     String?
-
-  @@map("CompanySettings")
+  id        Int      @id @default(1)
+  name      String   @default("Ingenious CRM")
+  logo      String?  @db.Text
+  updatedAt DateTime @updatedAt
 }
