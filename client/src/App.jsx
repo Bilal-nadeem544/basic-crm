@@ -7,6 +7,8 @@ import MyTasks from "./pages/MyTasks";
 import Dashboard from "./pages/Dashboard";
 import Settings from "./pages/Settings";
 import Team from "./pages/Team";
+import Calendar from "./pages/Calendar";
+import Notifications from "./pages/Notifications";
 import Login from "./pages/Login";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { LeadsProvider } from "./context/LeadsContext";
@@ -17,8 +19,7 @@ import { CompanyProvider } from "./context/CompanyContext";
 
 function AppLayout() {
   const { user, loading } = useAuth();
-
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-sm text-gray-400">Loading...</div>;
+  if (loading) return <div className="app-loading"><div className="spinner" /> Loading workspace…</div>;
   if (!user) return <Login />;
 
   return (
@@ -27,18 +28,22 @@ function AppLayout() {
         <LeadsProvider>
           <TasksProvider>
             <ActivitiesProvider>
-              <div className="flex bg-[#F3F4F6] min-h-screen">
+              <div className="app-shell">
                 <Sidebar />
-                <main className="flex-1 overflow-x-hidden">
+                <main className="app-main">
                   <Routes>
-                    <Route path="/" element={<Pipeline />} />
+                    <Route path="/" element={<Navigate to="/boards" replace />} />
+                    <Route path="/boards" element={<Pipeline />} />
+                    <Route path="/boards/:id" element={<Pipeline />} />
                     <Route path="/leads" element={<Leads />} />
                     <Route path="/leads/:id" element={<LeadDetail />} />
                     <Route path="/tasks" element={<MyTasks />} />
                     <Route path="/team" element={<Team />} />
                     <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/calendar" element={<Calendar />} />
+                    <Route path="/notifications" element={<Notifications />} />
                     <Route path="/settings" element={<Settings />} />
-                    <Route path="*" element={<Navigate to="/" />} />
+                    <Route path="*" element={<Navigate to="/boards" replace />} />
                   </Routes>
                 </main>
               </div>
@@ -51,11 +56,5 @@ function AppLayout() {
 }
 
 export default function App() {
-  return (
-    <BrowserRouter>
-      <AuthProvider>
-        <AppLayout />
-      </AuthProvider>
-    </BrowserRouter>
-  );
+  return <BrowserRouter><AuthProvider><AppLayout /></AuthProvider></BrowserRouter>;
 }

@@ -1,43 +1,23 @@
 import { useNavigate } from "react-router-dom";
-import { Building2, Phone } from "lucide-react";
+import { Building2, MessageSquare, Phone, Tag } from "lucide-react";
 import { stageColors } from "../data/dummyLeads";
 
+function initials(name="") { return name.split(" ").filter(Boolean).slice(0,2).map(x=>x[0]).join("").toUpperCase() || "?"; }
+
 export default function LeadCard({ lead, onDragStart, isDragging }) {
-  const colors = stageColors[lead.stage];
   const navigate = useNavigate();
-
-  return (
-    <div
-      draggable
-      onDragStart={(e) => onDragStart(e, lead.id)}
-      onClick={() => navigate(`/leads/${lead.id}`)}
-      className={`bg-white rounded-xl p-3 mb-3 shadow-sm border-l-4 cursor-grab active:cursor-grabbing transition-all hover:shadow-md ${
-        isDragging ? "opacity-40 scale-95" : "opacity-100"
-      }`}
-      style={{ borderLeftColor: colors.border }}
-    >
-      <h4 className="font-semibold text-sm text-[#111827]">{lead.name}</h4>
-
-      {lead.company && (
-        <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
-          <Building2 size={12} />
-          <span>{lead.company}</span>
-        </div>
-      )}
-
-      <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
-        <Phone size={12} />
-        <span>{lead.phone}</span>
+  const colors = stageColors[lead.stage] || stageColors.New;
+  return <article draggable onDragStart={e=>onDragStart(e,lead.id)} onClick={()=>navigate(`/leads/${lead.id}`)} className={`kanban-card ${isDragging ? "dragging" : ""}`}>
+    <div className="card-topline"><span className="priority-dot" style={{background: colors.border}}/><span className="card-source">{lead.source || "General"}</span></div>
+    <h3>{lead.name}</h3>
+    {lead.company && <div className="card-meta"><Building2 size={13}/><span>{lead.company}</span></div>}
+    {lead.phone && <div className="card-meta"><Phone size={13}/><span>{lead.phone}</span></div>}
+    <div className="card-footer">
+      <div className="card-indicators">
+        {lead.source && <span><Tag size={12}/>{lead.source}</span>}
+        <span><MessageSquare size={12}/>Activity</span>
       </div>
-
-      <div className="flex items-center justify-between mt-3">
-        <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-[#DBEAFE] text-[#1E40AF]">
-          {lead.source}
-        </span>
-        <div className="w-6 h-6 rounded-full bg-[#2563EB] text-white text-[10px] flex items-center justify-center font-semibold">
-          {lead.assignedTo?.[0] || "?"}
-        </div>
-      </div>
+      <div className="avatar" title={lead.assignedTo || "Unassigned"}>{initials(lead.assignedTo)}</div>
     </div>
-  );
+  </article>;
 }
