@@ -4,6 +4,7 @@ import { ArrowLeft, Phone, Mail, Building2, Check, CheckCircle2, Pencil, Trash2,
 import { useLeads } from "../context/LeadsContext";
 import { useTasks } from "../context/TasksContext";
 import { useActivities } from "../context/ActivitiesContext";
+import { useAuth } from "../context/AuthContext";
 import EditLeadModal from "../components/EditLeadModal";
 import { stageColors } from "../data/dummyLeads";
 
@@ -14,6 +15,8 @@ export default function LeadDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { leads } = useLeads();
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
   const { tasks, completeTask, reopenTask, addTask, updateTask, deleteTask } = useTasks();
   const { activitiesByLead, fetchActivities, addActivity, updateActivity, deleteActivity } = useActivities();
 
@@ -105,13 +108,15 @@ export default function LeadDetail() {
             <span className="text-xs px-3 py-1 rounded-full font-medium" style={{ backgroundColor: colors.bg, color: colors.text }}>
               {lead.stage}
             </span>
-            <button
-              onClick={() => setShowEditLead(true)}
-              className="w-8 h-8 rounded-lg border border-[#E5E7EB] flex items-center justify-center text-gray-500 hover:bg-[#F3F4F6] hover:text-[#2563EB]"
-              title="Edit lead"
-            >
-              <Pencil size={14} />
-            </button>
+            {isAdmin && (
+              <button
+                onClick={() => setShowEditLead(true)}
+                className="w-8 h-8 rounded-lg border border-[#E5E7EB] flex items-center justify-center text-gray-500 hover:bg-[#F3F4F6] hover:text-[#2563EB]"
+                title="Edit lead"
+              >
+                <Pencil size={14} />
+              </button>
+            )}
           </div>
         </div>
 
@@ -276,7 +281,7 @@ export default function LeadDetail() {
         </div>
       </div>
 
-      {showEditLead && <EditLeadModal lead={lead} onClose={() => setShowEditLead(false)} onDeleted={() => navigate("/leads")} />}
+      {showEditLead && isAdmin && <EditLeadModal lead={lead} onClose={() => setShowEditLead(false)} onDeleted={() => navigate("/leads")} />}
     </div>
   );
 }

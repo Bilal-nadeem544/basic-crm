@@ -19,6 +19,7 @@ model User {
   assignedLeads Lead[]     @relation("AssignedLeads")
   activities    Activity[]
   tasks         Task[]     @relation("AssignedTasks")
+  invitesSent   Invite[]
 
   @@map("crm_users")
 }
@@ -69,4 +70,16 @@ model CompanySettings {
   name      String   @default("Ingenious CRM")
   logo      String?  @db.Text
   updatedAt DateTime @updatedAt
+}
+
+model Invite {
+  id          Int      @id @default(autoincrement())
+  email       String
+  role        String   @default("staff")
+  token       String   @unique
+  status      String   @default("Pending")
+  invitedById Int
+  invitedBy   User     @relation(fields: [invitedById], references: [id])
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
 }

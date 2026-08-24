@@ -7,17 +7,19 @@ import {
   deleteLead,
   updateLeadStage,
 } from "../controllers/leads.controller.js";
-import { requireAuth } from "../middleware/auth.js";
+import { requireAuth, requireAdmin } from "../middleware/auth.js";
 
 const router = express.Router();
 
 router.use(requireAuth); // saare lead routes protected hain
 
 router.get("/", getLeads);
-router.post("/", createLead);
 router.get("/:id", getLeadById);
-router.put("/:id", updateLead);
-router.delete("/:id", deleteLead);
-router.put("/:id/stage", updateLeadStage);
+
+// Sirf admin (Super Admin) hi lead add/edit/delete/stage-change kar sakta hai
+router.post("/", requireAdmin, createLead);
+router.put("/:id", requireAdmin, updateLead);
+router.delete("/:id", requireAdmin, deleteLead);
+router.put("/:id/stage", requireAdmin, updateLeadStage);
 
 export default router;

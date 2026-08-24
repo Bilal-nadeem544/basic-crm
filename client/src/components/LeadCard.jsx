@@ -4,10 +4,10 @@ import { stageColors } from "../data/dummyLeads";
 
 function initials(name="") { return name.split(" ").filter(Boolean).slice(0,2).map(x=>x[0]).join("").toUpperCase() || "?"; }
 
-export default function LeadCard({ lead, onDragStart, isDragging }) {
+export default function LeadCard({ lead, onDragStart, isDragging, isAdmin }) {
   const navigate = useNavigate();
   const colors = stageColors[lead.stage] || stageColors.New;
-  return <article draggable onDragStart={e=>onDragStart(e,lead.id)} onClick={()=>navigate(`/leads/${lead.id}`)} className={`kanban-card ${isDragging ? "dragging" : ""}`}>
+  return <article draggable={!!isAdmin} onDragStart={e=>isAdmin && onDragStart(e,lead.id)} onClick={()=>navigate(`/leads/${lead.id}`)} className={`kanban-card ${isDragging ? "dragging" : ""}`}>
     <div className="card-topline"><span className="priority-dot" style={{background: colors.border}}/><span className="card-source">{lead.source || "General"}</span></div>
     <h3>{lead.name}</h3>
     {lead.company && <div className="card-meta"><Building2 size={13}/><span>{lead.company}</span></div>}
