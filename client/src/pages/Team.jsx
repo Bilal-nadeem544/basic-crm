@@ -6,75 +6,105 @@ import {
   X,
   Mail,
   ShieldCheck,
+  LockKeyhole,
+  User,
 } from "lucide-react";
 
 import { useUsers } from "../context/UsersContext";
 import { useLeads } from "../context/LeadsContext";
+import { useAuth } from "../context/AuthContext";
 import client from "../api/client";
 
 export default function Team() {
   const { users, loading } = useUsers();
   const { leads } = useLeads();
+  const { user } = useAuth();
 
-  const [showInvite, setShowInvite] = useState(false);
+  const [showAddMember, setShowAddMember] = useState(false);
+
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [role, setRole] = useState("staff");
-  const [sending, setSending] = useState(false);
+
+  const [creating, setCreating] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  function openInvite() {
-    setShowInvite(true);
+  function openAddMember() {
+    setShowAddMember(true);
     setMessage("");
     setError("");
   }
 
-  function closeInvite() {
-    if (sending) return;
+  function closeAddMember() {
+    if (creating) return;
 
-    setShowInvite(false);
+    setShowAddMember(false);
     setMessage("");
     setError("");
+    setName("");
     setEmail("");
+    setPassword("");
     setRole("staff");
   }
 
-  async function handleInvite(e) {
+  async function handleCreateMember(e) {
     e.preventDefault();
 
     setMessage("");
     setError("");
 
+    const cleanName = name.trim();
     const cleanEmail = email.trim().toLowerCase();
 
+    if (!cleanName) {
+      setError("Member name is required.");
+      return;
+    }
+
     if (!cleanEmail) {
-      setError("Employee email is required.");
+      setError("Member email is required.");
+      return;
+    }
+
+    if (!password) {
+      setError("Password is required.");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
       return;
     }
 
     try {
-      setSending(true);
+      setCreating(true);
 
-      const response = await client.post("/invites", {
+      const response = await client.post("/users", {
+        name: cleanName,
         email: cleanEmail,
+        password,
         role,
       });
 
       setMessage(
-        response.data?.message || "Invitation sent successfully."
+        response.data?.message || "Member created successfully."
       );
 
+      setName("");
       setEmail("");
+      setPassword("");
       setRole("staff");
     } catch (err) {
-      console.error("Invite employee error:", err);
+      console.error("Create member error:", err);
 
       setError(
         err.response?.data?.message ||
-          "Invitation could not be sent. Please try again."
+          "Member could not be created. Please try again."
       );
     } finally {
-      setSending(false);
+      setCreating(false);
     }
   }
 
@@ -92,14 +122,17 @@ export default function Team() {
             </p>
           </div>
 
-          <button
-            type="button"
-            className="primary-button"
-            onClick={openInvite}
-          >
-            <UserPlus size={17} />
-            Invite Employee
-          </button>
+          {/* Add Member is visible only to Admin */}
+          {user?.role === "admin" && (
+            <button
+              type="button"
+              className="primary-button"
+              onClick={openAddMember}
+            >
+              <UserPlus size={17} />
+              Add Member
+            </button>
+          )}
         </header>
 
         {loading ? (
@@ -168,13 +201,13 @@ export default function Team() {
         )}
       </div>
 
-      {/* Invite Employee Modal */}
-      {showInvite && (
+      {/* Add Member Modal */}
+      {showAddMember && user?.role === "admin" && (
         <div
           className="invite-overlay"
           onMouseDown={(e) => {
             if (e.target === e.currentTarget) {
-              closeInvite();
+              closeAddMember();
             }
           }}
         >
@@ -186,9 +219,10 @@ export default function Team() {
                 </div>
 
                 <div>
-                  <h2>Invite Employee</h2>
+                  <h2>Add Member</h2>
+
                   <p>
-                    Add a new member to your CRM workspace.
+                    Create a new member account for your CRM workspace.
                   </p>
                 </div>
               </div>
@@ -196,9 +230,9 @@ export default function Team() {
               <button
                 type="button"
                 className="invite-close"
-                onClick={closeInvite}
-                disabled={sending}
-                aria-label="Close invitation"
+                onClick={closeAddMember}
+                disabled={creating}
+                aria-label="Close add member"
               >
                 <X size={18} />
               </button>
@@ -206,35 +240,80 @@ export default function Team() {
 
             <form
               className="invite-form"
-              onSubmit={handleInvite}
+              onSubmit={handleCreateMember}
             >
               <div className="invite-field">
-                <label htmlFor="invite-email">
-                  Employee Email
+                <label htmlFor="member-name">
+                  Member Name
+                </label>
+
+                <div className="invite-input-wrapper">
+                  <User size={16} />
+
+                  <input
+                    id="member-name"
+                    type="text"
+                    placeholder="John Doe"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    disabled={creating}
+                    autoFocus
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="invite-field">
+                <label htmlFor="member-email">
+                  Email
                 </label>
 
                 <div className="invite-input-wrapper">
                   <Mail size={16} />
 
                   <input
-                    id="invite-email"
+                    id="member-email"
                     type="email"
                     placeholder="employee@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    disabled={sending}
-                    autoFocus
+                    disabled={creating}
                     required
                   />
                 </div>
 
                 <span className="invite-help">
-                  An invitation link will be sent to this email address.
+                  This email will be used to log in.
                 </span>
               </div>
 
               <div className="invite-field">
-                <label htmlFor="invite-role">
+                <label htmlFor="member-password">
+                  Password
+                </label>
+
+                <div className="invite-input-wrapper">
+                  <LockKeyhole size={16} />
+
+                  <input
+                    id="member-password"
+                    type="password"
+                    placeholder="Enter password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={creating}
+                    minLength={6}
+                    required
+                  />
+                </div>
+
+                <span className="invite-help">
+                  Minimum 6 characters.
+                </span>
+              </div>
+
+              <div className="invite-field">
+                <label htmlFor="member-role">
                   Role
                 </label>
 
@@ -242,10 +321,10 @@ export default function Team() {
                   <ShieldCheck size={16} />
 
                   <select
-                    id="invite-role"
+                    id="member-role"
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
-                    disabled={sending}
+                    disabled={creating}
                   >
                     <option value="staff">Staff</option>
                   </select>
@@ -270,8 +349,8 @@ export default function Team() {
                 <button
                   type="button"
                   className="secondary-button"
-                  onClick={closeInvite}
-                  disabled={sending}
+                  onClick={closeAddMember}
+                  disabled={creating}
                 >
                   Cancel
                 </button>
@@ -279,13 +358,13 @@ export default function Team() {
                 <button
                   type="submit"
                   className="primary-button"
-                  disabled={sending}
+                  disabled={creating}
                 >
                   <UserPlus size={16} />
 
-                  {sending
-                    ? "Sending..."
-                    : "Send Invitation"}
+                  {creating
+                    ? "Creating..."
+                    : "Create Member"}
                 </button>
               </div>
             </form>
