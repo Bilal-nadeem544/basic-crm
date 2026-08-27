@@ -1,4 +1,152 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import fallbackLogo from "../assets/ingenious-logo.png";
-export default function Login(){const {login,signup}=useAuth();const [isSignup,setIsSignup]=useState(false);const [form,setForm]=useState({name:"",email:"",password:""});const [error,setError]=useState("");const [loading,setLoading]=useState(false);const submit=async e=>{e.preventDefault();setError("");setLoading(true);try{if(isSignup)await signup(form.name,form.email,form.password);else await login(form.email,form.password)}catch(err){setError(err.response?.data?.message||"Something went wrong")}finally{setLoading(false)}};return <div className="auth-screen"><div className="auth-card"><div className="auth-brand"><img src={fallbackLogo} alt=""/><div><span>Project workspace</span><strong>Ingenious CRM</strong></div></div><div className="auth-intro"><h1>{isSignup?'Create your workspace account':'Welcome back'}</h1><p>{isSignup?'Start organizing your CRM work visually.':'Sign in to continue to your project workspace.'}</p></div><form onSubmit={submit} className="auth-form">{isSignup&&<input name="name" placeholder="Full name" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} required/>}<input name="email" type="email" placeholder="Email address" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} required/><input name="password" type="password" placeholder="Password" value={form.password} onChange={e=>setForm({...form,password:e.target.value})} required/>{error&&<div className="auth-error">{error}</div>}<button disabled={loading}>{loading?'Please wait…':isSignup?'Create account':'Sign in'}</button></form><button className="auth-switch" onClick={()=>setIsSignup(v=>!v)}>{isSignup?'Already have an account? Sign in':'Need an account? Create one'}</button></div></div>}
+
+export default function Login() {
+  const { login, signup } = useAuth();
+
+  const [isSignup, setIsSignup] = useState(false);
+
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      if (isSignup) {
+        await signup(
+          form.name,
+          form.email,
+          form.password
+        );
+      } else {
+        await login(
+          form.email,
+          form.password
+        );
+      }
+    } catch (err) {
+      if (!isSignup) {
+        setError("Invalid email or password.");
+      } else {
+        setError(
+          err.response?.data?.message ||
+            "Unable to create your account. Please try again."
+        );
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="auth-screen">
+      <div className="auth-card">
+
+        <div className="auth-brand">
+          <img src={fallbackLogo} alt="" />
+
+          <div>
+            <span>Project workspace</span>
+            <strong>Ingenious CRM</strong>
+          </div>
+        </div>
+
+        <div className="auth-intro">
+          <h1>
+            {isSignup
+              ? "Create your workspace account"
+              : "Welcome back"}
+          </h1>
+
+          <p>
+            {isSignup
+              ? "Start organizing your CRM work visually."
+              : "Sign in to continue to your project workspace."}
+          </p>
+        </div>
+
+        <form
+          onSubmit={submit}
+          className="auth-form"
+        >
+          {isSignup && (
+            <input
+              name="name"
+              placeholder="Full name"
+              value={form.name}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  name: e.target.value,
+                })
+              }
+              required
+            />
+          )}
+
+          <input
+            name="email"
+            type="email"
+            placeholder="Email address"
+            value={form.email}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                email: e.target.value,
+              })
+            }
+            required
+          />
+
+          <input
+            name="password"
+            type="password"
+            placeholder="Password"
+            value={form.password}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                password: e.target.value,
+              })
+            }
+            required
+          />
+
+          {error && (
+            <div className="auth-error">
+              {error}
+            </div>
+          )}
+
+          <button disabled={loading}>
+            {loading
+              ? "Please wait…"
+              : isSignup
+              ? "Create account"
+              : "Sign in"}
+          </button>
+        </form>
+
+        <button
+          className="auth-switch"
+          onClick={() => setIsSignup((v) => !v)}
+        >
+          {isSignup
+            ? "Already have an account? Sign in"
+            : "Need an account? Create one"}
+        </button>
+
+      </div>
+    </div>
+  );
+}
